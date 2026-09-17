@@ -8,12 +8,16 @@ current phase.
 
 ## Phase 0 — Get Ableton actually listening
 
-- [ ] Install [AbletonOSC](https://github.com/ideoforms/AbletonOSC) into
-      Live's Remote Scripts folder.
-- [ ] Select "AbletonOSC" under Preferences → Link/Tempo/MIDI → Control
-      Surface.
-- [ ] Sanity-check with a throwaway `python-osc` script: send
-      `/live/song/set/tempo` to port 11000, confirm Live's tempo changes.
+- [x] Install [AbletonOSC](https://github.com/ideoforms/AbletonOSC) into
+      Live's Remote Scripts folder. Cloned into
+      `~/Music/Ableton/User Library/Remote Scripts/AbletonOSC` (works for
+      both the Live 11 and Live 12 installs on this machine).
+- [x] Select "AbletonOSC" under Settings → Tempo & MIDI → Control Surface
+      (Live 12 renamed "Preferences" to "Settings"). Input/Output left as
+      None — AbletonOSC uses network ports, not MIDI.
+- [x] Sanity-check with `scripts/verify_osc_connection.py` (`python-osc`,
+      installed in a repo-local `.venv`): reads tempo, nudges it +1 BPM,
+      confirms the change, restores it. Confirmed working.
 
 ## Phase 1 — Talk to Live via an existing agent, no custom code yet
 
