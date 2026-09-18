@@ -25,7 +25,11 @@ settled:
 
 - **Ableton bridge**: AbletonOSC (Remote Script exposing the Live Object
   Model over OSC), default ports 11000 (send to Live) / 11001 (Live's
-  replies). Not raw MIDI, not a from-scratch Remote Script.
+  replies). Not raw MIDI, not a from-scratch Remote Script. This is what
+  the Phase 3 custom orchestrator will be built on. `AbletonMCP` (see
+  below) is a **different, temporary** bridge used only to validate the
+  concept in Phase 1 — don't conflate the two or assume AbletonMCP is
+  permanent.
 - **Arrangement model**: Session View, scene-per-section (scene 1 =
   intro, scene 2 = verse, etc.). Arrangement View automation is more
   awkward via the API and is not the primary approach.
@@ -81,6 +85,46 @@ settled:
   - Only reach for a hosted option (Turso, Supabase/Neon) if genuine
     multi-machine concurrent access becomes a real need — not by
     default.
+
+## Local environment state (this machine, as of Phase 1)
+
+Not architecture decisions — just what's physically installed and
+running, so a future session doesn't have to rediscover it:
+
+- **Ableton**: both Live 11 Suite and Live 12 Suite are installed. Live
+  12 renamed "Preferences" to "Settings"; the relevant tab is
+  "Tempo & MIDI".
+- **Remote Scripts installed** in
+  `~/Music/Ableton/User Library/Remote Scripts/` (this location works
+  for both Live versions without per-version copies — preferred over any
+  per-version `~/Library/Preferences/Ableton/Live [x]/User Remote
+  Scripts/` path):
+  - `AbletonOSC/` — Phase 0, verified working, selected as one Control
+    Surface slot. This is the permanent bridge (see above).
+  - `AbletonMCP/` — Phase 1 only, from the sibling repo below, TCP port
+    9877, selected as a separate Control Surface slot. Both scripts run
+    as independent slots simultaneously with no conflict.
+- **`ableton-mcp-extended`**: cloned as a *sibling* repo, not part of
+  this one, at `~/Documents/GitHub/ableton-mcp-extended` — used only for
+  Phase 1 validation via Claude Code, not something this repo depends on
+  going forward. Its local clone (not upstream) has two fixes applied
+  that aren't in this repo and would need reapplying if the clone is
+  ever deleted and re-cloned:
+  - `pyproject.toml`'s `packages` list referenced a nonexistent
+    `AbletonMCP_UDP` path at the repo root (it actually lives under
+    `Ableton-MCP_hybrid-server/`) — removed, since the UDP variant isn't
+    used here.
+  - `mcp[cli]` was unpinned and resolved to v2, which renamed `FastMCP`
+    to `MCPServer` and broke the v1-API code in `MCP_Server/server.py` —
+    pinned to `mcp[cli]>=1.3.0,<2`.
+- **Claude Desktop is not installed** on this machine. Phase 1 used
+  Claude Code instead — the MCP server is registered at **user scope**
+  (`claude mcp add -s user ableton-mcp -- ...`, config in
+  `~/.claude.json`, not in any repo), so it's available in any Claude
+  Code session on this machine, in any directory, not just this repo.
+- **This repo's own `.venv/`** (gitignored) has `python-osc` installed,
+  used by `scripts/verify_osc_connection.py`. Separate from
+  `ableton-mcp-extended`'s own `.venv/` in its sibling repo.
 
 ## Working conventions
 
