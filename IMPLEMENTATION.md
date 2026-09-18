@@ -21,12 +21,31 @@ current phase.
 
 ## Phase 1 — Talk to Live via an existing agent, no custom code yet
 
-- [ ] Install an existing Ableton MCP server (`ableton-mcp-extended` is
-      the actively maintained fork as of this writing — re-check current
-      state before installing, this space moves fast).
-- [ ] Connect it to Claude Desktop per its README.
-- [ ] Use it for real, on an actual track: build a kick pattern, add a
-      bassline, load a sample, create scenes for verse/drop.
+- [x] Install an existing Ableton MCP server: used
+      [`ableton-mcp-extended`](https://github.com/uisato/ableton-mcp-extended)
+      (cloned as a sibling repo, not part of this one, at
+      `~/Documents/GitHub/ableton-mcp-extended`). It uses its **own**
+      Remote Script ("AbletonMCP", TCP port 9877) — separate from
+      AbletonOSC (Phase 0), not built on top of it. Both Remote Scripts
+      now coexist in `~/Music/Ableton/User Library/Remote Scripts/`
+      without conflict. Had to patch the local clone: `pyproject.toml`
+      referenced a nonexistent `AbletonMCP_UDP` package path (removed —
+      we don't need the UDP variant), and pinned `mcp[cli]<2` since the
+      code targets the v1 `FastMCP` API, which v2 renamed.
+- [x] Connect it to an AI assistant: Claude Desktop isn't installed on
+      this machine, so registered with **Claude Code** instead via
+      `claude mcp add -s user ableton-mcp -- <venv>/bin/python
+      <repo>/MCP_Server/server.py`. Confirmed `claude mcp list` shows it
+      Connected.
+- [ ] Select "AbletonMCP" in Live's Settings → Tempo & MIDI → an empty
+      Control Surface slot (Input/Output: None) — separate slot from
+      AbletonOSC. Restart Live if it was already open. Look for
+      "AbletonMCP: Listening for commands on port 9877" in Live's status
+      bar to confirm it loaded.
+- [ ] Use it for real, on an actual track, from a **new** Claude Code
+      session/terminal (tools load at session start, so this running
+      session won't pick it up): build a kick pattern, add a bassline,
+      load a sample, create scenes for verse/drop.
 - [ ] Note what's clunky, what commands get repeated, whether "build a
       32-bar chorus" produces something usable with stock tools alone.
       This phase's purpose is information, not infrastructure — don't
