@@ -37,15 +37,17 @@ current phase.
       `claude mcp add -s user ableton-mcp -- <venv>/bin/python
       <repo>/MCP_Server/server.py`. Confirmed `claude mcp list` shows it
       Connected.
-- [ ] Select "AbletonMCP" in Live's Settings → Tempo & MIDI → an empty
+- [x] Select "AbletonMCP" in Live's Settings → Tempo & MIDI → an empty
       Control Surface slot (Input/Output: None) — separate slot from
-      AbletonOSC. Restart Live if it was already open. Look for
-      "AbletonMCP: Listening for commands on port 9877" in Live's status
-      bar to confirm it loaded.
-- [ ] Use it for real, on an actual track, from a **new** Claude Code
-      session/terminal (tools load at session start, so this running
-      session won't pick it up): build a kick pattern, add a bassline,
-      load a sample, create scenes for verse/drop.
+      AbletonOSC. Confirmed "AbletonMCP: Listening for commands on port
+      9877" in Live's status bar.
+- [x] Confirmed end-to-end from a new Claude Code session: asked Claude
+      about the current Ableton track and got a real answer back.
+- [ ] Use it for real, on an actual track: build a kick pattern, add a
+      bassline, load a sample, create scenes for verse/drop. Note what's
+      clunky, what commands get repeated, whether "build a 32-bar
+      chorus" produces something usable with stock tools alone — this is
+      what actually decides whether Phase 2+ is worth building.
 - [ ] Note what's clunky, what commands get repeated, whether "build a
       32-bar chorus" produces something usable with stock tools alone.
       This phase's purpose is information, not infrastructure — don't
