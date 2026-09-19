@@ -1,1 +1,4 @@
 python-osc
+librosa
+numpy
+soundfile

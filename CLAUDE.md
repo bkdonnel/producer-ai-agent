@@ -30,9 +30,17 @@ settled:
   below) is a **different, temporary** bridge used only to validate the
   concept in Phase 1 — don't conflate the two or assume AbletonMCP is
   permanent.
-- **Arrangement model**: Session View, scene-per-section (scene 1 =
-  intro, scene 2 = verse, etc.). Arrangement View automation is more
-  awkward via the API and is not the primary approach.
+- **Arrangement model**: Arrangement View is primary — sections are laid
+  out as clips on the linear timeline (e.g. `create_arrangement_midi_clip`
+  / `duplicate_clip_to_arrangement` via AbletonMCP; the eventual
+  AbletonOSC-based orchestrator will do the analogous thing). **Revised**
+  from the original Session-View-scene-per-section decision during Phase
+  1 hands-on use: the user wants to see the actual MIDI content on a
+  timeline while it's built, which Session clip slots don't show. Session
+  View is still used as a scratch step where a tool doesn't have a direct
+  arrangement-clip equivalent (e.g. programming notes, since
+  `ableton-mcp-extended` only exposes note-adding for session clips) —
+  build in a session slot, then move it into the arrangement.
 - **Orchestrator**: a single local Python process is the actual "brain."
   It runs the Claude API tool-use loop, holds an OSC client to AbletonOSC
   for Live control, and is a separate OSC server/client for the M4L
@@ -142,9 +150,20 @@ running, so a future session doesn't have to rediscover it:
   (`claude mcp add -s user ableton-mcp -- ...`, config in
   `~/.claude.json`, not in any repo), so it's available in any Claude
   Code session on this machine, in any directory, not just this repo.
-- **This repo's own `.venv/`** (gitignored) has `python-osc` installed,
-  used by `scripts/verify_osc_connection.py`. Separate from
-  `ableton-mcp-extended`'s own `.venv/` in its sibling repo.
+- **This repo's own `.venv/`** (gitignored) has `python-osc`, `librosa`,
+  `numpy`, and `soundfile` installed (see `requirements.txt`) — used by
+  `scripts/verify_osc_connection.py` and `scripts/index_samples.py`
+  respectively. Separate from `ableton-mcp-extended`'s own `.venv/` in
+  its sibling repo.
+- **Sample index DB**: `scripts/index_samples.py` (Phase 2) writes to
+  `data/samples.db` (SQLite, gitignored via `data/*.db` — derived,
+  regenerable, machine-specific paths). Walks
+  `~/Ableton Sounds/{Samples,Loops}` by default; incremental via
+  per-file mtime, `--force` to recompute. See the script's own docstring
+  and schema for the exact columns; validated on Kick/Bass subsets
+  (pitch detection cross-checks cleanly against filename-parsed root
+  notes) but the full ~12,381-file library hasn't been run yet as of
+  this writing — that's a deliberate pause point, not a blocker.
 
 ## Working conventions
 
