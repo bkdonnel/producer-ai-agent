@@ -43,6 +43,17 @@ current phase.
       9877" in Live's status bar.
 - [x] Confirmed end-to-end from a new Claude Code session: asked Claude
       about the current Ableton track and got a real answer back.
+- [x] First real usability finding: browsing the user's own sample
+      library (`/Users/bryandonnelly/Ableton Sounds/Samples` and
+      `.../Loops`, added as Places in Live's browser) initially failed —
+      `ableton-mcp-extended`'s browser-tree code couldn't traverse
+      `Browser.user_folders` (how Live exposes Places) because it's a
+      list-like sequence, not a single item like the other categories.
+      Patched the local clone to fix it (see `CLAUDE.md`); confirmed
+      `user_folders/Samples` and `user_folders/Loops` now list real
+      subfolders. Note for later phases: user-added library folders live
+      under `user_folders/<place name>/...`, not under `Samples` or
+      `User_library`.
 - [ ] Use it for real, on an actual track: build a kick pattern, add a
       bassline, load a sample, create scenes for verse/drop. Note what's
       clunky, what commands get repeated, whether "build a 32-bar

@@ -107,7 +107,7 @@ running, so a future session doesn't have to rediscover it:
 - **`ableton-mcp-extended`**: cloned as a *sibling* repo, not part of
   this one, at `~/Documents/GitHub/ableton-mcp-extended` — used only for
   Phase 1 validation via Claude Code, not something this repo depends on
-  going forward. Its local clone (not upstream) has two fixes applied
+  going forward. Its local clone (not upstream) has three fixes applied
   that aren't in this repo and would need reapplying if the clone is
   ever deleted and re-cloned:
   - `pyproject.toml`'s `packages` list referenced a nonexistent
@@ -117,6 +117,26 @@ running, so a future session doesn't have to rediscover it:
   - `mcp[cli]` was unpinned and resolved to v2, which renamed `FastMCP`
     to `MCPServer` and broke the v1-API code in `MCP_Server/server.py` —
     pinned to `mcp[cli]>=1.3.0,<2`.
+  - `AbletonMCP_Remote_Script/__init__.py`'s browser-tree code
+    (`get_browser_tree`, `get_browser_items_at_path`,
+    `_resolve_browser_root_category`) assumed every `Live.Browser`
+    category is a single item with `.name`/`.children`. `user_folders`
+    (Live's "Places" — the mechanism for reaching sample folders outside
+    Live's built-in library, e.g. this machine's
+    `/Users/bryandonnelly/Ableton Sounds/Samples` and `.../Loops`) is
+    actually one of Live's own tuple-like sequences, not a single item,
+    so it was silently skipped — the agent could never see user-added
+    sample folders, only Live's built-in `Samples`/`User_library`. Fixed
+    by wrapping any such sequence-valued category (`_wrap_browser_root`,
+    `_BrowserListWrapper`) so it's traversable like the others. Browse
+    with paths like `user_folders/<place name>/...`, e.g.
+    `user_folders/Samples/Kick`.
+  - **Deployment gotcha**: the Remote Script Live actually loads
+    (`~/Music/Ableton/User Library/Remote Scripts/AbletonMCP/`) is a
+    **plain copy** of `ableton-mcp-extended/AbletonMCP_Remote_Script/`,
+    not a symlink. Any future edit to the sibling repo's Remote Script
+    must be manually `cp`'d over to that path (and its `__pycache__`
+    cleared) before restarting Live, or Live keeps running the old code.
 - **Claude Desktop is not installed** on this machine. Phase 1 used
   Claude Code instead — the MCP server is registered at **user scope**
   (`claude mcp add -s user ableton-mcp -- ...`, config in
