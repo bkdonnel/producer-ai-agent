@@ -160,10 +160,12 @@ running, so a future session doesn't have to rediscover it:
   regenerable, machine-specific paths). Walks
   `~/Ableton Sounds/{Samples,Loops}` by default; incremental via
   per-file mtime, `--force` to recompute. See the script's own docstring
-  and schema for the exact columns; validated on Kick/Bass subsets
-  (pitch detection cross-checks cleanly against filename-parsed root
-  notes) but the full ~12,381-file library hasn't been run yet as of
-  this writing — that's a deliberate pause point, not a blocker.
+  and schema for the exact columns. **Full library indexed** (as of
+  2026-09-20): 12,283 rows, 6.06 MB, split 6,429 Samples / 5,854 Loops.
+  97 files failed (`libsndfile: Format not recognised`), all in
+  `Loops/Construction Kit/` and `Loops/Drum Fill/` — an encoding quirk
+  in those specific packs, not an indexer bug; unresolved, low priority.
+  Nothing yet queries this DB — that's Phase 3's job.
 
 ## Working conventions
 

@@ -97,7 +97,7 @@ rely on the off-the-shelf MCP server. Proceeding to Phase 2.
 
 ## Phase 2 — Two cheap, high-value, independent pieces
 
-- [ ] **Sample indexer**: script that walks the sample library, parses
+- [x] **Sample indexer**: script that walks the sample library, parses
       filenames/folders into tags, runs `librosa` for basic features
       (spectral centroid, RMS/crest, low-end ratio, duration, BPM/pitch
       where applicable), writes to SQLite. Skip embeddings for now —
@@ -113,13 +113,26 @@ rely on the off-the-shelf MCP server. Proceeding to Phase 2.
             E1 — for one file whose filename tag was unparseable due to a
             stray character). Confirms the tag+feature approach works
             before spending time on a full run.
-      - [ ] Run the full index (~12,381 files under `Samples`/`Loops`) —
-            paused intentionally; not yet kicked off as of this writing.
+      - [x] Ran the full index (~12,381 files under `Samples`/`Loops`):
+            **12,283 rows** in `data/samples.db` (6.06 MB), split 6,429
+            Samples (one-shots) / 5,854 Loops. Took ~1h55m in the
+            background. **97 files failed** with a consistent
+            `soundfile.LibsndfileError: Format not recognised` — all
+            concentrated in `Loops/Construction Kit/` (86 files, across
+            all 6 kits) and `Loops/Drum Fill/` (11 files); something
+            about those specific packs' WAV encoding isn't supported by
+            `libsndfile`, not a general indexer problem (0.8% of the
+            library). Worth a manual look at those files at some point,
+            not urgent. Re-running the script later only recomputes new/
+            changed files (mtime-based), so this is a one-time cost.
       - [ ] Known rough edge: `detected_pitch_confidence` reads low
             (~0.01–0.09) even on correct detections, since it's pyin's
             mean voiced-probability over a whole one-shot including its
             unvoiced attack transient. Usable as a rough signal only;
             revisit if it causes bad filtering decisions later.
+      - [ ] Not yet done: actually wiring this index into anything that
+            *queries* it (a search/filter helper, or Phase 3's tool
+            surface) — so far it's just a populated table.
 - [ ] **Technique presets**: save go-to production chains (e.g. the
       kick/bass sidechain compressor setup) as Ableton device/rack
       presets in the User Library, named clearly. Catalog them (path,
