@@ -130,24 +130,84 @@ rely on the off-the-shelf MCP server. Proceeding to Phase 2.
             mean voiced-probability over a whole one-shot including its
             unvoiced attack transient. Usable as a rough signal only;
             revisit if it causes bad filtering decisions later.
-      - [ ] Not yet done: actually wiring this index into anything that
-            *queries* it (a search/filter helper, or Phase 3's tool
-            surface) — so far it's just a populated table.
+      - [x] Query/filter helper built: `scripts/query_samples.py`, plain
+            SQL filtering over the existing columns (category,
+            library_root, vendor, tag, filename substring, detected
+            pitch, and min/max ranges on duration/centroid/low-end-ratio/
+            rms/crest/bpm). Importable as `query_samples()` for later
+            reuse as a Phase 3 agent tool, runnable standalone for ad-hoc
+            lookups. Tested against the real index (e.g. `--category
+            Kick --max-centroid 1000` and `--category Bass --pitch C1`
+            both returned sane results).
 - [ ] **Technique presets**: save go-to production chains (e.g. the
       kick/bass sidechain compressor setup) as Ableton device/rack
-      presets in the User Library, named clearly. Catalog them (path,
-      category, tags) — a SQLite table is fine, reuse the sample DB.
+      presets in the User Library, named clearly.
+      - [x] Cataloging tool built: `scripts/catalog_presets.py`, a
+            `presets` table in the same `data/samples.db` (name, path,
+            category, tags, notes) with `add`/`list` subcommands.
+      - [ ] **Not done yet, skipped for now**: actually building a
+            sidechain chain in Live, mapping any third-party params to
+            Rack Macros, and saving it to the User Library. No MCP tool
+            exposes "group as rack" / "save to library" — that part is
+            manual UI work in Live, not scriptable with the current
+            tool surface. Nothing is cataloged yet because there's no
+            preset to catalog. Revisit when ready to do the Live-side
+            work; `catalog_presets.py add` is ready to register it once
+            it exists.
 
 These two have no dependency on each other or on Phase 3 — can happen in
 either order or in parallel.
 
 ## Phase 3 — Build the real orchestrator
 
-- [ ] Replace the off-the-shelf MCP-server-in-Claude-Desktop setup with a
-      custom Python process: Claude API tool-use loop + AbletonOSC client
-      + tools wrapping the sample index and preset catalog from Phase 2.
-- [ ] This is the point the system stops being "someone else's MCP demo"
-      and starts being the actual product.
+- [x] **Scoped** (not yet built): replace the off-the-shelf MCP-server-in-
+      Claude-Code setup with a custom Python process — Claude API
+      (`claude-opus-5-5`) tool-use loop via the SDK's Tool Runner +
+      AbletonOSC client + tools wrapping the sample index and preset
+      catalog from Phase 2. This is the point the system stops being
+      "someone else's MCP demo" and starts being the actual product.
+      Full scoping writeup, including the plan's own context/reasoning,
+      is in the approved plan this session produced — see
+      `~/.claude/plans/parallel-puzzling-shamir.md` on this machine, or
+      the step list below for the durable summary.
+- [ ] **Not yet built — the actual implementation.**
+- **Key finding that reshaped scope**: AbletonOSC's real OSC address
+  space (`~/Music/Ableton/User Library/Remote Scripts/AbletonOSC/abletonosc/`)
+  is narrower than `ableton-mcp-extended`'s (the Phase 1 bridge). It fully
+  covers song/track/clip(session)/clip_slot/scene/device-parameter/view
+  control, tempo, transport, and mixer — but has **no Browser API at
+  all**, **no way to load an instrument/effect/sample onto a track**, and
+  **no way to create or place a clip in the Arrangement timeline**. Those
+  three only exist in `ableton-mcp-extended`'s separate Remote Script.
+  This also means the Phase 1 "build in Session View, then
+  `duplicate_clip_to_arrangement`" workaround has no AbletonOSC
+  equivalent yet either.
+- **Decision**: scope v1 to what AbletonOSC genuinely supports now
+  (prove the orchestrator's Claude-loop + AbletonOSC plumbing works)
+  rather than extending AbletonOSC's Remote Script first. Concretely, v1
+  **cannot** load a sample/instrument or place anything in Arrangement —
+  it can create tracks, build/edit Session-View MIDI clips, control
+  tempo/transport/mixer, and read/adjust parameters on devices the user
+  has *already* dropped onto a track by hand. Loading chosen samples
+  (from the Phase 2 index) and Arrangement placement become sub-phase
+  **3b**: extend AbletonOSC's Remote Script itself with browser-traversal
+  and arrangement-clip-placement handlers, modeled on
+  `ableton-mcp-extended`'s existing implementation of the same features.
+- **Steps for v1** (in build order): (0) get an `ANTHROPIC_API_KEY` (none
+  set on this machine yet) and add `anthropic` to `requirements.txt`; (1)
+  `orchestrator/live_client.py` — a `LiveClient` wrapping AbletonOSC's
+  send/listen/timeout pattern (already proven in
+  `scripts/verify_osc_connection.py`) into typed methods for the
+  confirmed-available addresses only; (2) `orchestrator/tools.py` —
+  `@beta_tool`-decorated typed wrappers (one per action, not a catch-all)
+  over `LiveClient` plus read-only wrappers of the existing
+  `query_samples()` / `list_presets()`; (3) `orchestrator/agent.py` — the
+  Tool Runner loop, with the system prompt stating the v1 capability
+  boundary explicitly so Claude doesn't attempt calls that don't exist;
+  (4) `orchestrator/cli.py` — a stdin/stdout REPL as Phase 3's
+  integration-test surface, standing in for the M4L device until Phase 4
+  exists; (5) manual validation against a real Live session with a
+  device already loaded by hand on at least one track.
 
 ## Phase 4 — The Max for Live interaction device
 

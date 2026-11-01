@@ -2,3 +2,4 @@ python-osc
 librosa
 numpy
 soundfile
+anthropic

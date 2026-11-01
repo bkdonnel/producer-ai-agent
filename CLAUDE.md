@@ -30,6 +30,21 @@ settled:
   below) is a **different, temporary** bridge used only to validate the
   concept in Phase 1 — don't conflate the two or assume AbletonMCP is
   permanent.
+  - **Known limitation (found during Phase 3 scoping)**: AbletonOSC's
+    actual OSC address space (`~/Music/Ableton/User Library/Remote
+    Scripts/AbletonOSC/abletonosc/`) is narrower than `AbletonMCP`'s. It
+    fully covers song/track/clip(session)/clip_slot/scene/
+    device-parameter/view control, tempo, transport, and mixer — but has
+    **no Browser API**, **no way to load an instrument/effect/sample
+    onto a track**, and **no way to create or place a clip in the
+    Arrangement timeline**. `AbletonMCP`'s separate Remote Script
+    implements all three via its own custom logic. The Phase 3
+    orchestrator's v1 is scoped around this gap (control what's already
+    in the Live set; no loading or Arrangement placement yet) — closing
+    it is sub-phase 3b: extend AbletonOSC's Remote Script itself with
+    browser-traversal and arrangement-clip-placement handlers, modeled
+    on `AbletonMCP`'s existing implementation. See `IMPLEMENTATION.md`
+    Phase 3 for the full scoping writeup.
 - **Arrangement model**: Arrangement View is primary — sections are laid
   out as clips on the linear timeline (e.g. `create_arrangement_midi_clip`
   / `duplicate_clip_to_arrangement` via AbletonMCP; the eventual
